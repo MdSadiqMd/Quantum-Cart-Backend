@@ -5,6 +5,7 @@ import (
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/api/utils"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/services"
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,7 +17,9 @@ type UserHandler struct {
 func SetupUserRoutes(handler *utils.Handler) {
 	app := handler.App
 
-	userService := services.UserService{}
+	userService := services.UserService{
+		UserRepo: repository.NewUserRepository(handler.DB),
+	}
 	userHandler := UserHandler{
 		service: userService,
 	}
@@ -41,25 +44,40 @@ func (h *UserHandler) Register(ctx *fiber.Ctx) error {
 	err := ctx.BodyParser(&user)
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": "Failed at Backend DTO",
+			"error": "Failed at Backend DTO",
 		})
 	}
 
 	token, err := h.service.Signup(user)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-			"message": "Error at Signup Auth",
+			"error": "Error at Signup Auth",
 		})
 	}
 
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": token,
+		"success": token,
 	})
 }
 
 func (h *UserHandler) Login(ctx *fiber.Ctx) error {
+	user := dto.UserLogin{}
+	err := ctx.BodyParser(&user)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"error": "Failed at Backend DTO",
+		})
+	}
+
+	token, err := h.service.Login(user.Email, user.Password)
+	if err != nil {
+		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": "Error at Login Auth",
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User login successfully",
+		"success": token,
 	})
 }
 

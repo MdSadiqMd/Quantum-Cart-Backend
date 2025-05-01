@@ -15,5 +15,5 @@ type User struct {
 	UserType  string    `json:"user_type" gorm:"default:buyer"`
 	CreatedAt time.Time `json:"created_at" gorm:"default:current_timestamp"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"default:current_timestamp"`
-	VoidedOn  time.Time `json:"voided_on"`
+	VoidedOn  time.Time `json:"voided_on" gorm:"default:NULL"`
 }

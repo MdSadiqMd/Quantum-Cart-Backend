@@ -1,26 +1,48 @@
 package services
 
 import (
+	"errors"
+	"fmt"
 	"log"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 )
 
 type UserService struct {
+	UserRepo repository.UserRepository
 }
 
 func (s UserService) Signup(input dto.UserSignup) (string, error) {
-	log.Println(input)
-	return "token", nil
+	user, err := s.UserRepo.CreateUser(models.User{
+		Email:    input.Email,
+		Phone:    input.Phone,
+		Password: input.Password,
+	})
+	if err != nil {
+		log.Printf("error in creating user: %v", err)
+		return "", errors.New("failed to create user")
+	}
+
+	userInfo := fmt.Sprintf("%v %v %v", user.Id, user.Email, user.UserType)
+	return userInfo, nil
 }
 
-func (s UserService) Login(input any) (string, error) {
-	return "", nil
+func (s UserService) Login(email string, password string) (string, error) {
+	user, err := s.findUserByEmail(email)
+	if err != nil {
+		return "", errors.New("failed to find user")
+	}
+	if user.Password != password {
+		return "", errors.New("invalid password")
+	}
+	return user.Email, nil
 }
 
 func (s UserService) findUserByEmail(email string) (*models.User, error) {
-	return &models.User{}, nil
+	user, err := s.UserRepo.FindUser(email)
+	return &user, err
 }
 
 func (s UserService) GetVerificationCode(e models.User) (int, error) {
