@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/api/utils"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/postgres"
@@ -19,6 +20,8 @@ func StartServer(config config.AppConfig) {
 		log.Fatalf("error in db connection: %v", err)
 	}
 	log.Println("Database connected successfully 🚀")
+
+	db.AutoMigrate(&models.User{})
 
 	app.Get("/healthz", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(&fiber.Map{
