@@ -8,7 +8,8 @@ import (
 )
 
 type AppConfig struct {
-	ServerPort string
+	ServerPort     string
+	DataSourceName string
 }
 
 func SetupEnv() (cfg AppConfig, err error) {
@@ -19,5 +20,13 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("PORT variable not found")
 	}
 
-	return AppConfig{ServerPort: httpPort}, nil
+	DataSourseName := os.Getenv("DB_URL")
+	if DataSourseName == "" {
+		return AppConfig{}, errors.New("DB_URL variable not found")
+	}
+
+	return AppConfig{
+		ServerPort:     httpPort,
+		DataSourceName: DataSourseName,
+	}, nil
 }
