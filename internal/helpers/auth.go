@@ -122,3 +122,7 @@ func (auth Auth) Authorize(ctx *fiber.Ctx) error {
 		})
 	}
 }
+
+func (auth Auth) GenerateCode() (int, error) {
+	return RandomNumbers(6)
+}

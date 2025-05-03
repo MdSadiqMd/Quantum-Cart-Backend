@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"log"
+	"time"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
@@ -53,8 +54,31 @@ func (s UserService) findUserByEmail(email string) (*models.User, error) {
 	return &user, err
 }
 
-func (s UserService) GetVerificationCode(e models.User) (int, error) {
-	return 0, nil
+func (s UserService) isVerifiedUser(id uint) bool {
+	user, err := s.UserRepo.FindUserById(id)
+	return err != nil && user.Verified
+}
+
+func (s UserService) GetVerificationCode(user models.User) (int, error) {
+	if s.isVerifiedUser(user.Id) {
+		return user.Code, nil
+	}
+
+	code, err := s.Auth.GenerateCode()
+	if err != nil {
+		return 0, errors.New("failed to generate code")
+	}
+
+	updateUser := models.User{
+		Expiry: time.Now().Add(time.Minute * 30),
+		Code:   code,
+	}
+
+	_, err = s.UserRepo.UpdateUser(user.Id, updateUser)
+	if err != nil {
+		return 0, errors.New("failed to update verification code")
+	}
+	return code, nil
 }
 
 func (s UserService) VerifyCode(id uint, input any) error {

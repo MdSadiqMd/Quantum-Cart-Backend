@@ -36,6 +36,7 @@ func SetupUserRoutes(handler *utils.Handler) {
 	privateRoutes.Post("/verify", userHandler.Verify)
 	privateRoutes.Post("/profile", userHandler.CreateProfile)
 	privateRoutes.Get("/profile", userHandler.GetProfile)
+
 	privateRoutes.Post("/cart", userHandler.AddToCart)
 	privateRoutes.Get("/cart", userHandler.GetCart)
 	privateRoutes.Post("/order", userHandler.CreateOrder)
@@ -87,8 +88,18 @@ func (h *UserHandler) Login(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
+	user := h.service.Auth.GetCurrentUser(ctx)
+
+	code, err := h.service.GetVerificationCode(user)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"error": err,
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User get verification code successfully",
+		"data":    code,
 	})
 }
 
