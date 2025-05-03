@@ -81,7 +81,30 @@ func (s UserService) GetVerificationCode(user models.User) (int, error) {
 	return code, nil
 }
 
-func (s UserService) VerifyCode(id uint, input any) error {
+func (s UserService) VerifyCode(id uint, code int) error {
+	if s.isVerifiedUser(id) {
+		return errors.New("user is already verified")
+	}
+
+	user, err := s.UserRepo.FindUserById(id)
+	if err != nil {
+		return errors.New("failed to find user")
+	}
+	if user.Code != code {
+		return errors.New("invalid verification code")
+	}
+	if time.Now().After(user.Expiry) {
+		return errors.New("verification code is expired")
+	}
+
+	updateUser := models.User{
+		Verified: true,
+	}
+
+	_, err = s.UserRepo.UpdateUser(user.Id, updateUser)
+	if err != nil {
+		return errors.New("failed to update verification code")
+	}
 	return nil
 }
 
