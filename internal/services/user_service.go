@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
@@ -17,18 +16,22 @@ type UserService struct {
 }
 
 func (s UserService) Signup(input dto.UserSignup) (string, error) {
+	hashedPassword, err := s.Auth.CreateHashedPassowrd(input.Password)
+	if err != nil {
+		return "", errors.New("failed to hash password")
+	}
+
 	user, err := s.UserRepo.CreateUser(models.User{
 		Email:    input.Email,
+		Password: hashedPassword,
 		Phone:    input.Phone,
-		Password: input.Password,
 	})
 	if err != nil {
 		log.Printf("error in creating user: %v", err)
 		return "", errors.New("failed to create user")
 	}
 
-	userInfo := fmt.Sprintf("%v %v %v", user.Id, user.Email, user.UserType)
-	return userInfo, nil
+	return s.Auth.GenerateToken(user.Id, user.Email, user.UserType)
 }
 
 func (s UserService) Login(email string, password string) (string, error) {
