@@ -27,19 +27,21 @@ func SetupUserRoutes(handler *utils.Handler) {
 		service: userService,
 	}
 
-	app.Post("/register", userHandler.Register)
-	app.Post("/login", userHandler.Login)
+	publicRoutes := app.Group("/users")
+	publicRoutes.Post("/register", userHandler.Register)
+	publicRoutes.Post("/login", userHandler.Login)
 
-	app.Get("/verify", userHandler.GetVerificationCode)
-	app.Post("/verify", userHandler.Verify)
-	app.Post("/profile", userHandler.CreateProfile)
-	app.Get("/profile", userHandler.GetProfile)
-	app.Post("/cart", userHandler.AddToCart)
-	app.Get("/cart", userHandler.GetCart)
-	app.Post("/order", userHandler.CreateOrder)
-	app.Get("/orders", userHandler.GetOrders)
-	app.Get("/order/:id", userHandler.GetOrder)
-	app.Post("/become-seller", userHandler.BecomeSeller)
+	privateRoutes := publicRoutes.Group("/", handler.Auth.Authorize)
+	privateRoutes.Get("/verify", userHandler.GetVerificationCode)
+	privateRoutes.Post("/verify", userHandler.Verify)
+	privateRoutes.Post("/profile", userHandler.CreateProfile)
+	privateRoutes.Get("/profile", userHandler.GetProfile)
+	privateRoutes.Post("/cart", userHandler.AddToCart)
+	privateRoutes.Get("/cart", userHandler.GetCart)
+	privateRoutes.Post("/order", userHandler.CreateOrder)
+	privateRoutes.Get("/orders", userHandler.GetOrders)
+	privateRoutes.Get("/order/:id", userHandler.GetOrder)
+	privateRoutes.Post("/become-seller", userHandler.BecomeSeller)
 }
 
 func (h *UserHandler) Register(ctx *fiber.Ctx) error {

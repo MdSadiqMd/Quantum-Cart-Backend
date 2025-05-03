@@ -109,3 +109,16 @@ func (auth Auth) GetCurrentUser(ctx *fiber.Ctx) models.User {
 	user := ctx.Locals("user")
 	return user.(models.User)
 }
+
+func (auth Auth) Authorize(ctx *fiber.Ctx) error {
+	authHeader := ctx.GetReqHeaders()["Authorization"][0]
+	user, err := auth.VerifyToken(authHeader)
+	if err == nil && user.Id > 0 {
+		ctx.Locals("user", user)
+		return ctx.Next()
+	} else {
+		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": err,
+		})
+	}
+}
