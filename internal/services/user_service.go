@@ -3,17 +3,21 @@ package services
 import (
 	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/events"
 )
 
 type UserService struct {
 	UserRepo repository.UserRepository
 	Auth     helpers.Auth
+	Config   config.AppConfig
 }
 
 func (s UserService) Signup(input dto.UserSignup) (string, error) {
@@ -59,14 +63,14 @@ func (s UserService) isVerifiedUser(id uint) bool {
 	return err != nil && user.Verified
 }
 
-func (s UserService) GetVerificationCode(user models.User) (int, error) {
+func (s UserService) GetVerificationCode(user models.User) error {
 	if s.isVerifiedUser(user.Id) {
-		return user.Code, nil
+		return nil
 	}
 
 	code, err := s.Auth.GenerateCode()
 	if err != nil {
-		return 0, errors.New("failed to generate code")
+		return errors.New("failed to generate code")
 	}
 
 	updateUser := models.User{
@@ -76,9 +80,20 @@ func (s UserService) GetVerificationCode(user models.User) (int, error) {
 
 	_, err = s.UserRepo.UpdateUser(user.Id, updateUser)
 	if err != nil {
-		return 0, errors.New("failed to update verification code")
+		return errors.New("failed to update verification code")
 	}
-	return code, nil
+
+	user, err = s.UserRepo.FindUserById(user.Id)
+	if err != nil {
+		return errors.New("failed to find user")
+	}
+
+	notificationClient := events.NewNotificationClient(s.Config)
+	err = notificationClient.SendSMS(user.Phone, "Your verification code is: "+strconv.Itoa(code))
+	if err != nil {
+		return errors.New("failed to send verification code")
+	}
+	return nil
 }
 
 func (s UserService) VerifyCode(id uint, code int) error {

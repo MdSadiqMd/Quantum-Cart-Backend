@@ -5,7 +5,6 @@ import (
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/api/utils"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
-	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/services"
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +12,6 @@ import (
 
 type UserHandler struct {
 	service services.UserService
-	auth    helpers.Auth
 }
 
 func SetupUserRoutes(handler *utils.Handler) {
@@ -22,6 +20,7 @@ func SetupUserRoutes(handler *utils.Handler) {
 	userService := services.UserService{
 		UserRepo: repository.NewUserRepository(handler.DB),
 		Auth:     handler.Auth,
+		Config:   handler.Config,
 	}
 	userHandler := UserHandler{
 		service: userService,
@@ -89,8 +88,7 @@ func (h *UserHandler) Login(ctx *fiber.Ctx) error {
 
 func (h *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
 	user := h.service.Auth.GetCurrentUser(ctx)
-
-	code, err := h.service.GetVerificationCode(user)
+	err := h.service.GetVerificationCode(user)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"error": err,
@@ -99,7 +97,6 @@ func (h *UserHandler) GetVerificationCode(ctx *fiber.Ctx) error {
 
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User get verification code successfully",
-		"data":    code,
 	})
 }
 
