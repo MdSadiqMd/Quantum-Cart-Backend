@@ -5,6 +5,7 @@ import (
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/api/utils"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/services"
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +13,7 @@ import (
 
 type UserHandler struct {
 	service services.UserService
+	auth    helpers.Auth
 }
 
 func SetupUserRoutes(handler *utils.Handler) {
@@ -19,6 +21,7 @@ func SetupUserRoutes(handler *utils.Handler) {
 
 	userService := services.UserService{
 		UserRepo: repository.NewUserRepository(handler.DB),
+		Auth:     handler.Auth,
 	}
 	userHandler := UserHandler{
 		service: userService,

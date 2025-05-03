@@ -10,6 +10,7 @@ import (
 type AppConfig struct {
 	ServerPort     string
 	DataSourceName string
+	AppSecret      string
 }
 
 func SetupEnv() (cfg AppConfig, err error) {
@@ -25,8 +26,14 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("DB_URL variable not found")
 	}
 
+	appSecret := os.Getenv("APP_SECRET")
+	if appSecret == "" {
+		return AppConfig{}, errors.New("APP_SECRET variable not found")
+	}
+
 	return AppConfig{
 		ServerPort:     httpPort,
 		DataSourceName: DataSourseName,
+		AppSecret:      appSecret,
 	}, nil
 }

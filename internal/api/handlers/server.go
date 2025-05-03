@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/api/utils"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +23,7 @@ func StartServer(config config.AppConfig) {
 	log.Println("Database connected successfully 🚀")
 
 	db.AutoMigrate(&models.User{})
+	auth := helpers.NewAuth(config.AppSecret)
 
 	app.Get("/healthz", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(&fiber.Map{
@@ -30,8 +32,9 @@ func StartServer(config config.AppConfig) {
 	})
 
 	apiHandler := &utils.Handler{
-		App: app,
-		DB:  db,
+		App:  app,
+		DB:   db,
+		Auth: auth,
 	}
 	SetupRoutes(apiHandler)
 

@@ -6,12 +6,14 @@ import (
 	"log"
 
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 )
 
 type UserService struct {
 	UserRepo repository.UserRepository
+	Auth     helpers.Auth
 }
 
 func (s UserService) Signup(input dto.UserSignup) (string, error) {
@@ -34,10 +36,13 @@ func (s UserService) Login(email string, password string) (string, error) {
 	if err != nil {
 		return "", errors.New("failed to find user")
 	}
-	if user.Password != password {
-		return "", errors.New("invalid password")
+
+	err = s.Auth.VerifyPassword(password, user.Password)
+	if err != nil {
+		return "", errors.New("password does not match")
 	}
-	return user.Email, nil
+
+	return s.Auth.GenerateToken(user.Id, user.Email, user.UserType)
 }
 
 func (s UserService) findUserByEmail(email string) (*models.User, error) {
