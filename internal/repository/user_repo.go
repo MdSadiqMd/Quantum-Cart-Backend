@@ -58,9 +58,9 @@ func (r *userRepository) FindUserById(id uint) (models.User, error) {
 
 func (r *userRepository) UpdateUser(id uint, user models.User) (models.User, error) {
 	var updatedUser models.User
-	err := r.db.Model(&user).Clauses(clause.Returning{}).Where("id = ?", id).Updates(user).Error
-	if err != nil {
-		log.Printf("error in updating user: %v", err)
+	result := r.db.Model(&models.User{}).Where("id = ?", id).Clauses(clause.Returning{}).Updates(user).Scan(&updatedUser)
+	if result.Error != nil {
+		log.Printf("error in updating user: %v", result.Error)
 		return models.User{}, errors.New("failed to update user")
 	}
 	return updatedUser, nil

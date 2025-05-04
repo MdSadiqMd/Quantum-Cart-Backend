@@ -16,6 +16,7 @@ import (
 
 type UserService struct {
 	UserRepo repository.UserRepository
+	BankRepo repository.BankRepository
 	Auth     helpers.Auth
 	Config   config.AppConfig
 }
@@ -135,8 +136,42 @@ func (s UserService) UpdateProfile(id uint, input any) error {
 	return nil
 }
 
-func (s UserService) BecomeSeller(id uint, input any) (string, error) {
-	return "", nil
+func (s UserService) BecomeSeller(id uint, input dto.SellerInput) (string, error) {
+	user, err := s.UserRepo.FindUserById(id)
+	if err != nil {
+		return "", errors.New("failed to find user")
+	}
+	if user.UserType == models.SELLER {
+		return "", errors.New("user is already a seller")
+	}
+
+	seller, err := s.UserRepo.UpdateUser(id, models.User{
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Phone:     input.Phone,
+		UserType:  models.SELLER,
+	})
+	if err != nil {
+		return "", errors.New("failed to update user")
+	}
+
+	token, err := s.Auth.GenerateToken(user.Id, user.Email, seller.UserType)
+	if err != nil {
+		return "", errors.New("failed to generate token")
+	}
+
+	err = s.BankRepo.CreateBankAccount(models.BankAccount{
+		BankAccount: input.BankAccountNumber,
+		SwiftCode:   input.SwiftCode,
+		PaymentType: input.PaymentType,
+		UserId:      id,
+	})
+	if err != nil {
+		log.Printf("Failed to create bank account: %v", err)
+		return token, nil
+	}
+
+	return token, nil
 }
 
 func (s UserService) GetCart(id uint) ([]interface{}, error) {

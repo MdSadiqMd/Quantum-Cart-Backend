@@ -22,7 +22,12 @@ func StartServer(config config.AppConfig) {
 	}
 	log.Println("Database connected successfully 🚀")
 
-	db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(&models.User{}, &models.BankAccount{})
+	if err != nil {
+		log.Fatalf("error in db migration: %v", err)
+	}
+	log.Println("Database migrated successfully 🔀")
+
 	auth := helpers.NewAuth(config.AppSecret)
 
 	app.Get("/healthz", func(ctx *fiber.Ctx) error {

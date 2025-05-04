@@ -2,6 +2,11 @@ package models
 
 import "time"
 
+const (
+	BUYER  = "buyer"
+	SELLER = "seller"
+)
+
 type User struct {
 	Id        uint      `json:"id" gorm:"primary_key"`
 	FirstName string    `json:"first_name"`

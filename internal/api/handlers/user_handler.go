@@ -19,6 +19,7 @@ func SetupUserRoutes(handler *utils.Handler) {
 
 	userService := services.UserService{
 		UserRepo: repository.NewUserRepository(handler.DB),
+		BankRepo: repository.NewBankRepository(handler.DB),
 		Auth:     handler.Auth,
 		Config:   handler.Config,
 	}
