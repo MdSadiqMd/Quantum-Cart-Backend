@@ -123,6 +123,26 @@ func (auth Auth) Authorize(ctx *fiber.Ctx) error {
 	}
 }
 
+func (auth Auth) AuthorizeSeller(ctx *fiber.Ctx) error {
+	authHeader := ctx.GetReqHeaders()["Authorization"][0]
+	user, err := auth.VerifyToken(authHeader)
+
+	if err != nil {
+		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": err,
+			"message": "Unauthorized",
+		})
+	} else if user.Id > 0 && user.UserType == "seller" {
+		ctx.Locals("user", user)
+		return ctx.Next()
+	} else {
+		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"error": err,
+			"message": "Please login as a seller",
+		})
+	}
+}
+
 func (auth Auth) GenerateCode() (int, error) {
 	return RandomNumbers(6)
 }

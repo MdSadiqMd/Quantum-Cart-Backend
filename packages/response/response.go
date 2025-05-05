@@ -9,7 +9,7 @@ func ErrorResponse(ctx *fiber.Ctx, status int, err error) error {
 	})
 }
 
-func SuccessReponse(ctx *fiber.Ctx, status int, message string, data interface{}) error {
+func SuccessResponse(ctx *fiber.Ctx, status int, message string, data interface{}) error {
 	return ctx.Status(status).JSON(&fiber.Map{
 		"success": message,
 		"data":    data,
