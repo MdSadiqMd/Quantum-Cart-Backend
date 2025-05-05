@@ -1,13 +1,16 @@
 package repository
 
-import "gorm.io/gorm"
+import (
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
+	"gorm.io/gorm"
+)
 
 type CatalogRepository interface {
-	CreateCatalog(catalog models.Catalog) error
-	FindCatalog(id uint) (models.Catalog, error)
-	FindAllCatalogs() ([]models.Catalog, error)
-	UpdateCatalog(id uint, catalog models.Catalog) (models.Catalog, error)
-	DeleteCatalog(catalog models.Catalog) (models.Catalog, error)
+	CreateCategory(category *models.Category) error
+	FindCategories() ([]*models.Category, error)
+	FindCategoryById(id uint) (*models.Category, error)
+	EditCategory(category *models.Category) (*models.Category, error)
+	DeleteCategory(category *models.Category) error
 }
 
 type catalogRepository struct {
@@ -20,4 +23,44 @@ func NewCatalogRepository(db *gorm.DB) CatalogRepository {
 	}
 }
 
+func (r catalogRepository) CreateCategory(category *models.Category) error {
+	err := r.db.Create(&category).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
+func (r catalogRepository) FindCategories() ([]*models.Category, error) {
+	var categories []*models.Category
+	err := r.db.Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (r catalogRepository) FindCategoryById(id uint) (*models.Category, error) {
+	var category models.Category
+	err := r.db.Where("id = ?", id).First(&category).Error
+	if err != nil {
+		return nil, err
+	}
+	return &category, nil
+}
+
+func (r catalogRepository) EditCategory(category *models.Category) (*models.Category, error) {
+	err := r.db.Save(&category).Error
+	if err != nil {
+		return nil, err
+	}
+	return category, nil
+}
+
+func (r catalogRepository) DeleteCategory(category *models.Category) error {
+	err := r.db.Delete(&category).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
