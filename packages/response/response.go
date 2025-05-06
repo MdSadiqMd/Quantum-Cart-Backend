@@ -2,9 +2,9 @@ package response
 
 import "github.com/gofiber/fiber/v2"
 
-func ErrorResponse(ctx *fiber.Ctx, status int, err error) error {
+func ErrorResponse(ctx *fiber.Ctx, status int, message string, err error) error {
 	return ctx.Status(status).JSON(&fiber.Map{
-		"error": err.Error(),
+		"error": message + ": " + err.Error(),
 		"data":  nil,
 	})
 }
