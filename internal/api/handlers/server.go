@@ -50,4 +50,5 @@ func StartServer(config config.AppConfig) {
 func SetupRoutes(handler *utils.Handler) {
 	SetupUserRoutes(handler)
 	SetupCatalogRoutes(handler)
+	SetupProductRoutes(handler)
 }

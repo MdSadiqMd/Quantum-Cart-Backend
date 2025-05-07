@@ -30,8 +30,6 @@ func SetupCatalogRoutes(handler *utils.Handler) {
 	}
 
 	publicRoutes := app.Group("/")
-	publicRoutes.Get("/products", catalogHandler.GetProducts)
-	publicRoutes.Get("/products/:id", catalogHandler.GetProduct)
 	publicRoutes.Get("/categories", catalogHandler.GetCategories)
 	publicRoutes.Get("/categories/:id", catalogHandler.GetCategory)
 
@@ -39,10 +37,6 @@ func SetupCatalogRoutes(handler *utils.Handler) {
 	privateRoutes.Post("/categories", catalogHandler.CreateCategory)
 	privateRoutes.Patch("/categories/:id", catalogHandler.EditCategory)
 	privateRoutes.Delete("/categories/:id", catalogHandler.DeleteCategory)
-	privateRoutes.Post("/products", catalogHandler.CreateProduct)
-	privateRoutes.Put("/products/:id", catalogHandler.EditProduct)
-	privateRoutes.Patch("/products/:id", catalogHandler.UpdateStock)
-	privateRoutes.Delete("/products/:id", catalogHandler.DeleteProduct)
 }
 
 func (h CatalogHandler) CreateCategory(ctx *fiber.Ctx) error {
@@ -111,28 +105,4 @@ func (h CatalogHandler) DeleteCategory(ctx *fiber.Ctx) error {
 		return response.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to delete category", err)
 	}
 	return response.SuccessResponse(ctx, http.StatusOK, "Category deleted successfully", nil)
-}
-
-func (h CatalogHandler) CreateProduct(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Product created successfully", nil)
-}
-
-func (h CatalogHandler) GetProducts(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Products fetched successfully", nil)
-}
-
-func (h CatalogHandler) GetProduct(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Product fetched successfully", nil)
-}
-
-func (h CatalogHandler) EditProduct(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Product edited successfully", nil)
-}
-
-func (h CatalogHandler) UpdateStock(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Product stock updated successfully", nil)
-}
-
-func (h CatalogHandler) DeleteProduct(ctx *fiber.Ctx) error {
-	return response.SuccessResponse(ctx, http.StatusOK, "Product deleted successfully", nil)
 }
