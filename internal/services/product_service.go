@@ -6,6 +6,7 @@ import (
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/repository"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
+	"github.com/gofiber/fiber/v2"
 )
 
 type ProductService struct {
@@ -22,14 +23,15 @@ func NewProductService(productRepo repository.ProductRepository, auth helpers.Au
 	}
 }
 
-func (s *ProductService) CreateProduct(input dto.CreateProductRequest) (*models.Product, error) {
+func (s *ProductService) CreateProduct(ctx *fiber.Ctx, input dto.CreateProductRequest) (*models.Product, error) {
+	user := s.Auth.GetCurrentUser(ctx)
 	product, err := s.ProductRepo.CreateProduct(&models.Product{
 		Name:        input.Name,
 		Description: input.Description,
 		CategoryId:  input.CategoryId,
 		ImageUrls:   input.ImageUrls,
 		Price:       input.Price,
-		UserId:      input.UserId,
+		UserId:      int(user.Id),
 		Stock:       input.Stock,
 	})
 	if err != nil {
@@ -63,7 +65,7 @@ func (s *ProductService) FindSellerProducts(id uint) ([]*models.Product, error) 
 	return products, nil
 }
 
-func (s *ProductService) UpdateProduct(id uint, input dto.CreateProductRequest) (*models.Product, error) {
+func (s *ProductService) UpdateProduct(id uint, input dto.CreateProductRequest, user *models.User) (*models.Product, error) {
 	existingProduct, err := s.ProductRepo.FindProductbyId(id)
 	if err != nil {
 		return nil, err
@@ -75,6 +77,7 @@ func (s *ProductService) UpdateProduct(id uint, input dto.CreateProductRequest) 
 	existingProduct.ImageUrls = input.ImageUrls
 	existingProduct.Price = input.Price
 	existingProduct.Stock = input.Stock
+	existingProduct.UserId = int(user.Id)
 
 	updatedProduct, err := s.ProductRepo.UpdateProduct(id, existingProduct)
 	if err != nil {
