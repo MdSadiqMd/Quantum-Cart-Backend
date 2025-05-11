@@ -9,6 +9,7 @@ import (
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -28,8 +29,14 @@ func StartServer(config config.AppConfig) {
 	}
 	log.Println("Database migrated successfully 🔀")
 
-	auth := helpers.NewAuth(config.AppSecret)
+	corsConfig := cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Accept, Authorization, Content-Type",
+		AllowMethods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+	})
+	app.Use(corsConfig)
 
+	auth := helpers.NewAuth(config.AppSecret)
 	app.Get("/healthz", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 			"status": "OK",
