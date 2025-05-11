@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/dto"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
@@ -78,6 +80,7 @@ func (s *ProductService) UpdateProduct(id uint, input dto.CreateProductRequest, 
 	existingProduct.Price = input.Price
 	existingProduct.Stock = input.Stock
 	existingProduct.UserId = int(user.Id)
+	existingProduct.UpdatedAt = time.Now()
 
 	updatedProduct, err := s.ProductRepo.UpdateProduct(id, existingProduct)
 	if err != nil {

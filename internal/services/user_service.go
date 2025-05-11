@@ -174,14 +174,6 @@ func (s UserService) BecomeSeller(id uint, input dto.SellerInput) (string, error
 	return token, nil
 }
 
-func (s UserService) GetCart(id uint) ([]interface{}, error) {
-	return nil, nil
-}
-
-func (s UserService) CreateCart(input any, u models.User) ([]interface{}, error) {
-	return nil, nil
-}
-
 func (s UserService) CreateOrder(u models.User) (int, error) {
 	return 0, nil
 }
