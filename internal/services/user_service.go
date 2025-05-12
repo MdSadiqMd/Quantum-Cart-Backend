@@ -56,7 +56,10 @@ func (s UserService) Login(email string, password string) (string, error) {
 
 func (s UserService) findUserByEmail(email string) (*models.User, error) {
 	user, err := s.UserRepo.FindUser(email)
-	return &user, err
+	if err != nil {
+		return nil, errors.New("failed to find user")
+	}
+	return &user, nil
 }
 
 func (s UserService) isVerifiedUser(id uint) bool {
@@ -124,16 +127,75 @@ func (s UserService) VerifyCode(id uint, code int) error {
 	return nil
 }
 
-func (s UserService) CreateProfile(id uint, input any) error {
-	return nil
+func (s UserService) CreateProfile(id uint, user dto.ProfileInput) (models.Address, error) {
+	_, err := s.UserRepo.UpdateUser(id, models.User{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+	})
+	if err != nil {
+		return models.Address{}, errors.New("failed to update user")
+	}
+
+	address := models.Address{
+		AddressLine1: user.AddressInput.AddressLine1,
+		AddressLine2: user.AddressInput.AddressLine2,
+		City:         user.AddressInput.City,
+		Country:      user.AddressInput.Country,
+		PostCode:     user.AddressInput.PostCode,
+		UserId:       id,
+	}
+
+	address, err = s.UserRepo.CreateProfile(address)
+	if err != nil {
+		return models.Address{}, errors.New("failed to create profile")
+	}
+	return address, nil
 }
 
 func (s UserService) GetProfile(id uint) (*models.User, error) {
-	return &models.User{}, nil
+	user, err := s.UserRepo.FindUserById(id)
+	if err != nil {
+		return nil, errors.New("failed to find user")
+	}
+	return &user, nil
 }
 
-func (s UserService) UpdateProfile(id uint, input any) error {
-	return nil
+func (s UserService) UpdateProfile(id uint, user dto.ProfileInput) (models.Address, error) {
+	existingUser, err := s.UserRepo.FindUserById(id)
+	if err != nil {
+		return models.Address{}, errors.New("failed to find user")
+	}
+
+	if existingUser.FirstName != user.FirstName {
+		_, err := s.UserRepo.UpdateUser(id, models.User{
+			FirstName: user.FirstName,
+		})
+		if err != nil {
+			return models.Address{}, errors.New("failed to update user")
+		}
+	}
+
+	if existingUser.LastName != user.LastName {
+		_, err := s.UserRepo.UpdateUser(id, models.User{
+			LastName: user.LastName,
+		})
+		if err != nil {
+			return models.Address{}, errors.New("failed to update user")
+		}
+	}
+
+	address, err := s.UserRepo.UpdateProfile(models.Address{
+		AddressLine1: user.AddressInput.AddressLine1,
+		AddressLine2: user.AddressInput.AddressLine2,
+		City:         user.AddressInput.City,
+		Country:      user.AddressInput.Country,
+		PostCode:     user.AddressInput.PostCode,
+		UserId:       id,
+	})
+	if err != nil {
+		return models.Address{}, errors.New("failed to update profile")
+	}
+	return address, nil
 }
 
 func (s UserService) BecomeSeller(id uint, input dto.SellerInput) (string, error) {

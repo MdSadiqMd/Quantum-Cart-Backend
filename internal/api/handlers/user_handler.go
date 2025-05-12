@@ -36,6 +36,7 @@ func SetupUserRoutes(handler *utils.Handler) {
 	privateRoutes.Post("/verify", userHandler.Verify)
 	privateRoutes.Post("/profile", userHandler.CreateProfile)
 	privateRoutes.Get("/profile", userHandler.GetProfile)
+	privateRoutes.Patch("/profile", userHandler.UpdateProfile)
 
 	privateRoutes.Post("/order", userHandler.CreateOrder)
 	privateRoutes.Get("/orders", userHandler.GetOrders)
@@ -121,14 +122,60 @@ func (h *UserHandler) Verify(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandler) CreateProfile(ctx *fiber.Ctx) error {
+	user := h.service.Auth.GetCurrentUser(ctx)
+	req := dto.ProfileInput{}
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"error": "Profile Input Data is not valid",
+		})
+	}
+
+	profile, err := h.service.CreateProfile(user.Id, req)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"error": err,
+		})
+	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User profile created successfully",
+		"data":    profile,
 	})
 }
 
 func (h *UserHandler) GetProfile(ctx *fiber.Ctx) error {
+	user := h.service.Auth.GetCurrentUser(ctx)
+	profile, err := h.service.GetProfile(user.Id)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"error": err,
+		})
+	}
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User profile fetched successfully",
+		"data":    profile,
+	})
+}
+
+func (h *UserHandler) UpdateProfile(ctx *fiber.Ctx) error {
+	user := h.service.Auth.GetCurrentUser(ctx)
+	req := dto.ProfileInput{}
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"error": "Profile Input Data is not valid",
+		})
+	}
+
+	profile, err := h.service.UpdateProfile(user.Id, req)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"error": err,
+		})
+	}
+	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "User profile updated successfully",
+		"data":    profile,
 	})
 }
 

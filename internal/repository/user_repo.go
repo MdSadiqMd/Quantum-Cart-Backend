@@ -15,6 +15,8 @@ type UserRepository interface {
 	FindUserById(id uint) (models.User, error)
 	UpdateUser(id uint, user models.User) (models.User, error)
 	DeleteUser(user models.User) (models.User, error)
+	CreateProfile(user models.Address) (models.Address, error)
+	UpdateProfile(user models.Address) (models.Address, error)
 }
 
 type userRepository struct {
@@ -48,7 +50,7 @@ func (r *userRepository) FindUser(email string) (models.User, error) {
 
 func (r *userRepository) FindUserById(id uint) (models.User, error) {
 	var user models.User
-	err := r.db.Where("id = ?", id).First(&user).Error
+	err := r.db.Preload("Address").Where("id = ?", id).First(&user).Error
 	if err != nil {
 		log.Printf("error in finding user: %v", err)
 		return models.User{}, errors.New("failed to find user")
@@ -71,6 +73,23 @@ func (r *userRepository) DeleteUser(user models.User) (models.User, error) {
 	if err != nil {
 		log.Printf("error in deleting user: %v", err)
 		return models.User{}, errors.New("failed to delete user")
+	}
+	return user, nil
+}
+
+func (r *userRepository) CreateProfile(user models.Address) (models.Address, error) {
+	err := r.db.Create(&user).Error
+	if err != nil {
+		log.Printf("error in creating profile: %v", err)
+		return models.Address{}, errors.New("failed to create profile")
+	}
+	return user, nil
+}
+
+func (r *userRepository) UpdateProfile(user models.Address) (models.Address, error) {
+	err := r.db.Model(&models.Address{}).Where("user_id = ?", user.UserId).Clauses(clause.Returning{}).Updates(user).Error
+	if err != nil {
+		return models.Address{}, errors.New("failed to update profile")
 	}
 	return user, nil
 }
