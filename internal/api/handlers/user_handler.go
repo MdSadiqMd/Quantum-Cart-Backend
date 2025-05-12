@@ -37,8 +37,6 @@ func SetupUserRoutes(handler *utils.Handler) {
 	privateRoutes.Post("/profile", userHandler.CreateProfile)
 	privateRoutes.Get("/profile", userHandler.GetProfile)
 
-	privateRoutes.Post("/cart", userHandler.AddToCart)
-	privateRoutes.Get("/cart", userHandler.GetCart)
 	privateRoutes.Post("/order", userHandler.CreateOrder)
 	privateRoutes.Get("/orders", userHandler.GetOrders)
 	privateRoutes.Get("/order/:id", userHandler.GetOrder)
@@ -131,18 +129,6 @@ func (h *UserHandler) CreateProfile(ctx *fiber.Ctx) error {
 func (h *UserHandler) GetProfile(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User profile fetched successfully",
-	})
-}
-
-func (h *UserHandler) AddToCart(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User added to cart successfully",
-	})
-}
-
-func (h *UserHandler) GetCart(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User cart fetched successfully",
 	})
 }
 
