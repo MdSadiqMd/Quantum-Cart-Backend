@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Cart struct {
-	ID        uint      `gorm:"PrimaryKey" json:"id"`
+	ID        uint      `json:"id" gorm:"primary_key"`
 	UserId    uint      `json:"user_id"`
 	ProductId uint      `json:"product_id"`
 	Name      string    `json:"name"`

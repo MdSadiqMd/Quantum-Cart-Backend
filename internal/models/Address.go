@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Address struct {
-	ID           uint      `gorm:"PrimaryKey" json:"id"`
+	ID           uint      `json:"id" gorm:"primary_key"`
 	AddressLine1 string    `json:"address_line1"`
 	AddressLine2 string    `json:"address_line2"`
 	City         string    `json:"city"`
