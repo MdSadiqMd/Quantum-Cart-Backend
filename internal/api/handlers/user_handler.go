@@ -37,10 +37,6 @@ func SetupUserRoutes(handler *utils.Handler) {
 	privateRoutes.Post("/profile", userHandler.CreateProfile)
 	privateRoutes.Get("/profile", userHandler.GetProfile)
 	privateRoutes.Patch("/profile", userHandler.UpdateProfile)
-
-	privateRoutes.Post("/order", userHandler.CreateOrder)
-	privateRoutes.Get("/orders", userHandler.GetOrders)
-	privateRoutes.Get("/order/:id", userHandler.GetOrder)
 	privateRoutes.Post("/become-seller", userHandler.BecomeSeller)
 }
 
@@ -176,24 +172,6 @@ func (h *UserHandler) UpdateProfile(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "User profile updated successfully",
 		"data":    profile,
-	})
-}
-
-func (h *UserHandler) CreateOrder(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User order created successfully",
-	})
-}
-
-func (h *UserHandler) GetOrders(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User orders fetched successfully",
-	})
-}
-
-func (h *UserHandler) GetOrder(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "User order fetched successfully",
 	})
 }
 

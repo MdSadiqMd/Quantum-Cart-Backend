@@ -28,8 +28,10 @@ func StartServer(config config.AppConfig) {
 		&models.Address{},
 		&models.BankAccount{},
 		&models.Category{},
-		&models.Product{},
 		&models.Cart{},
+		&models.Product{},
+		&models.Order{},
+		&models.OrderItem{},
 	)
 	if err != nil {
 		log.Fatalf("error in db migration: %v", err)
@@ -66,4 +68,5 @@ func SetupRoutes(handler *utils.Handler) {
 	SetupCatalogRoutes(handler)
 	SetupProductRoutes(handler)
 	SetupCartRoutes(handler)
+	SetupOrderRoutes(handler)
 }
