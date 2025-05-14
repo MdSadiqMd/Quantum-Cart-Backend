@@ -50,7 +50,10 @@ func (r *userRepository) FindUser(email string) (models.User, error) {
 
 func (r *userRepository) FindUserById(id uint) (models.User, error) {
 	var user models.User
-	err := r.db.Preload("Address").Where("id = ?", id).First(&user).Error
+	err := r.db.Preload("Address").
+		Preload("Cart").
+		Preload("Orders").
+		Where("id = ?", id).First(&user).Error
 	if err != nil {
 		log.Printf("error in finding user: %v", err)
 		return models.User{}, errors.New("failed to find user")
