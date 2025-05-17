@@ -14,6 +14,9 @@ type AppConfig struct {
 	TwilioAccountSid      string
 	TwilioAuthToken       string
 	TwilioFromPhoneNumber string
+	StripeSecret          string
+	SuccessURL            string
+	CancelURL             string
 }
 
 func SetupEnv() (cfg AppConfig, err error) {
@@ -49,6 +52,21 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("TWILIO_FROM_NUMBER variable not found")
 	}
 
+	StripeSecret := os.Getenv("STRIPE_SECRET")
+	if StripeSecret == "" {
+		return AppConfig{}, errors.New("STRIPE_SECRET variable not found")
+	}
+
+	SuccessURL := os.Getenv("SUCCESS_URL")
+	if SuccessURL == "" {
+		return AppConfig{}, errors.New("SUCCESS_URL variable not found")
+	}
+
+	CancelURL := os.Getenv("CANCEL_URL")
+	if CancelURL == "" {
+		return AppConfig{}, errors.New("CANCEL_URL variable not found")
+	}
+
 	return AppConfig{
 		ServerPort:            httpPort,
 		DataSourceName:        DataSourceName,
@@ -56,5 +74,8 @@ func SetupEnv() (cfg AppConfig, err error) {
 		TwilioAccountSid:      twilioSid,
 		TwilioAuthToken:       twilioToken,
 		TwilioFromPhoneNumber: twilioFromPhoneNumber,
+		StripeSecret:          StripeSecret,
+		SuccessURL:            SuccessURL,
+		CancelURL:             CancelURL,
 	}, nil
 }

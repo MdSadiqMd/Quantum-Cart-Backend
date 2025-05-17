@@ -7,6 +7,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
+	github.com/stripe/stripe-go/v78 v78.12.0
 	github.com/twilio/twilio-go v1.25.1
 	golang.org/x/crypto v0.37.0
 	gorm.io/driver/postgres v1.5.11

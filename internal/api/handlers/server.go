@@ -8,6 +8,7 @@ import (
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/helpers"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/internal/models"
 	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/config"
+	"github.com/MdSadiqMd/Quantum-Cart-Backend/packages/payment"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"gorm.io/driver/postgres"
@@ -46,6 +47,7 @@ func StartServer(config config.AppConfig) {
 	app.Use(corsConfig)
 
 	auth := helpers.NewAuth(config.AppSecret)
+	paymentClient := payment.NewPaymentClient(config.StripeSecret, config.SuccessURL, config.CancelURL)
 	app.Get("/healthz", func(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 			"status": "OK",
@@ -53,10 +55,11 @@ func StartServer(config config.AppConfig) {
 	})
 
 	apiHandler := &utils.Handler{
-		App:    app,
-		DB:     db,
-		Auth:   auth,
-		Config: config,
+		App:           app,
+		DB:            db,
+		Auth:          auth,
+		Config:        config,
+		PaymentClient: paymentClient,
 	}
 	SetupRoutes(apiHandler)
 
