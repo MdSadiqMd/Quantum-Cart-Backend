@@ -17,5 +17,9 @@ func RandomNumbers(length int) (int, error) {
 	for i := range buffer {
 		buffer[i] = numbers[int(buffer[i])%numLength]
 	}
+
+	if buffer[0] == '0' {
+		buffer[0] = numbers[1+int(buffer[0])%(numLength-1)]
+	}
 	return strconv.Atoi(string(buffer))
 }
