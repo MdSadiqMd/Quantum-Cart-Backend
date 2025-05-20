@@ -13,6 +13,7 @@ type OrderRepository interface {
 	CreateCartOrders(orders []*models.Order) ([]*models.Order, error)
 	GetOrders(userId uint) ([]*models.Order, error)
 	GetOrderById(id uint, userId uint) (*models.Order, error)
+	GetCurrentOrder(userId uint) (*models.Order, error)
 }
 
 type orderRepository struct {
@@ -59,6 +60,16 @@ func (r orderRepository) GetOrderById(id uint, userId uint) (*models.Order, erro
 	if err != nil {
 		log.Printf("error in getting order: %v", err)
 		return nil, errors.New("failed to get order")
+	}
+	return &order, nil
+}
+
+func (r orderRepository) GetCurrentOrder(userId uint) (*models.Order, error) {
+	var order models.Order
+	err := r.db.Where("user_id = ? AND status = ?", userId, models.OrderStatusPending).First(&order).Error
+	if err != nil {
+		log.Printf("error in getting current order: %v", err)
+		return nil, errors.New("failed to get current order")
 	}
 	return &order, nil
 }
