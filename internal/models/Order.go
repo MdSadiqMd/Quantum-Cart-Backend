@@ -6,10 +6,20 @@ import (
 	"github.com/lib/pq"
 )
 
+type OrderStatus string
+
+const (
+	OrderStatusDelivered  OrderStatus = "initial"
+	OrderStatusPending    OrderStatus = "pending"
+	OrderStatusProcessing OrderStatus = "yet_to_deliver"
+	OrderStatusCompleted  OrderStatus = "completed"
+	OrderStatusCancelled  OrderStatus = "cancelled"
+)
+
 type Order struct {
 	ID             uint        `json:"id" gorm:"primary_key"`
 	UserId         uint        `json:"user_id" gorm:"index;not null"`
-	Status         string      `json:"status"`
+	Status         OrderStatus `json:"status" gorm:"default:initial"`
 	Amount         float64     `json:"amount"`
 	TransactionId  string      `json:"transaction_id"`
 	OrderRefNumber string      `json:"order_ref_number"`
