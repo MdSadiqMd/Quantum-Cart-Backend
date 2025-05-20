@@ -15,6 +15,7 @@ type AppConfig struct {
 	TwilioAuthToken       string
 	TwilioFromPhoneNumber string
 	StripeSecret          string
+	PublishableKey        string
 	SuccessURL            string
 	CancelURL             string
 }
@@ -57,6 +58,11 @@ func SetupEnv() (cfg AppConfig, err error) {
 		return AppConfig{}, errors.New("STRIPE_SECRET variable not found")
 	}
 
+	PublishableKey := os.Getenv("STRIPE_PUBLISHABLE_KEY")
+	if PublishableKey == "" {
+		return AppConfig{}, errors.New("PUBLISHABLE_KEY variable not found")
+	}
+
 	SuccessURL := os.Getenv("SUCCESS_URL")
 	if SuccessURL == "" {
 		return AppConfig{}, errors.New("SUCCESS_URL variable not found")
@@ -75,6 +81,7 @@ func SetupEnv() (cfg AppConfig, err error) {
 		TwilioAuthToken:       twilioToken,
 		TwilioFromPhoneNumber: twilioFromPhoneNumber,
 		StripeSecret:          StripeSecret,
+		PublishableKey:        PublishableKey,
 		SuccessURL:            SuccessURL,
 		CancelURL:             CancelURL,
 	}, nil
