@@ -65,6 +65,7 @@ func (s *OrderService) CreateOrder(userId uint, orders []*dto.CreateOrderRequest
 		PaymentId:      "123",
 		TransactionId:  "123",
 		OrderRefNumber: fmt.Sprint(orderRef),
+		Status:         models.OrderStatusPending,
 		Amount:         totalAmount,
 		Items:          orderItems,
 	}
@@ -109,4 +110,25 @@ func (s *OrderService) GetOrderById(id uint, userId uint) (*models.Order, error)
 		return nil, err
 	}
 	return order, nil
+}
+
+func (s *OrderService) GetCurrentOrder(userId uint) (*models.Order, float64, error) {
+	order, err := s.OrderRepo.GetCurrentOrder(userId)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if len(order.Items) == 0 {
+		orderWithItems, err := s.OrderRepo.GetOrderById(order.ID, userId)
+		if err != nil {
+			return nil, 0, err
+		}
+		order = orderWithItems
+	}
+
+	var total float64
+	for _, item := range order.Items {
+		total += item.Price * float64(item.Quantity)
+	}
+	return order, total, nil
 }
