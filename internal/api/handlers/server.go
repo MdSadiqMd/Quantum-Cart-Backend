@@ -30,6 +30,7 @@ func StartServer(config config.AppConfig) {
 		&models.BankAccount{},
 		&models.Category{},
 		&models.Cart{},
+		&models.Payment{},
 		&models.Product{},
 		&models.Order{},
 		&models.OrderItem{},
@@ -72,4 +73,5 @@ func SetupRoutes(handler *utils.Handler) {
 	SetupProductRoutes(handler)
 	SetupCartRoutes(handler)
 	SetupOrderRoutes(handler)
+	SetupTransactionRoutes(handler)
 }
