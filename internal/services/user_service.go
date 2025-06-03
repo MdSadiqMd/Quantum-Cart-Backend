@@ -235,15 +235,3 @@ func (s UserService) BecomeSeller(id uint, input dto.SellerInput) (string, error
 
 	return token, nil
 }
-
-func (s UserService) CreateOrder(u models.User) (int, error) {
-	return 0, nil
-}
-
-func (s UserService) GetOrders(u models.User) ([]interface{}, error) {
-	return nil, nil
-}
-
-func (s UserService) GetOrderById(id uint, userId uint) ([]interface{}, error) {
-	return nil, nil
-}
