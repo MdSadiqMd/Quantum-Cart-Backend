@@ -22,6 +22,7 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ gomod2nix.overlays.default ];
+          config.allowUnsupportedSystem = true;
         };
 
         # Primary application build
@@ -30,47 +31,43 @@
           version = "0.1.0";
           src = ./.;
           modules = ./gomod2nix.toml;
-
-          # Strip debug information for smaller binaries (like Dockerfile)
           ldflags = [
             "-s"
             "-w"
           ];
-
-          # Environment variables required during build time if any
           CGO_ENABLED = 0;
         };
 
-        # Docker image build using pkg's dockerTools
-        dockerImage = pkgs.dockerTools.buildImage {
+        linux_app = app.overrideAttrs (old: {
+          GOOS = "linux";
+          GOARCH = "arm64";
+        });
+
+        pwd = builtins.getEnv "PWD";
+        envFilePath = if pwd != "" then "${pwd}/.env" else ./.env;
+        envFileResult = builtins.tryEval (builtins.readFile envFilePath);
+        envFile = if envFileResult.success then envFileResult.value else "";
+
+        # Create .env file in Nix store (will be copied to Docker image)
+        # This keeps secrets out of the flake source code but includes them in the image
+        envFileStore = pkgs.writeText "env-file" envFile;
+
+        dockerImage = pkgs.dockerTools.buildLayeredImage {
           name = "quantum-cart-backend";
           tag = "latest";
+          contents = [
+            linux_app
+            pkgs.cacert # Needed for Stripe/Twilio HTTPS calls
+          ];
 
-          # Use a minimal base like Alpine (or 'null' for scratch, but let's stick to alpine for shell access if needed)
-          fromImage = pkgs.dockerTools.pullImage {
-            imageName = "alpine";
-            imageDigest = "sha256:51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212"; # alpine:latest
-            sha256 = "sha256-51183f2cfa6320055da30872f211093f9ff1d3cf06f39a0bdb212";
-            finalImageTag = "latest";
-            finalImageName = "alpine";
-          };
-
-          copyToRoot = pkgs.buildEnv {
-            name = "image-root";
-            paths = [
-              app
-              pkgs.cacert # Needed for Stripe/Twilio HTTPS calls
-              pkgs.bash
-              pkgs.coreutils
-            ];
-            pathsToLink = [
-              "/bin"
-              "/etc"
-            ];
-          };
+          extraCommands = ''
+            mkdir -p app
+            cp ${envFileStore} app/.env
+            chmod 600 app/.env
+          '';
 
           config = {
-            Cmd = [ "${app}/bin/main" ];
+            Cmd = [ "${linux_app}/bin/linux_arm64/cmd" ];
             ExposedPorts = {
               "3000/tcp" = { };
             };
@@ -84,6 +81,7 @@
       in
       {
         packages.default = app;
+        packages.linux_app = linux_app;
         packages.docker = dockerImage;
 
         # Development environment

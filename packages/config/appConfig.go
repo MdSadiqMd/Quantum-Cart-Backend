@@ -21,8 +21,21 @@ type AppConfig struct {
 	CancelURL             string
 }
 
+func loadEnvFile() error {
+	envPath := ".env"
+	if _, err := os.Stat(envPath); err == nil {
+		return godotenv.Load(envPath)
+	}
+
+	dockerEnvPath := "/app/.env"
+	if _, err := os.Stat(dockerEnvPath); err == nil {
+		return godotenv.Load(dockerEnvPath)
+	}
+	return nil
+}
+
 func SetupEnv() (cfg AppConfig, err error) {
-	godotenv.Load()
+	loadEnvFile()
 
 	httpPort := os.Getenv("PORT")
 	if httpPort == "" {
