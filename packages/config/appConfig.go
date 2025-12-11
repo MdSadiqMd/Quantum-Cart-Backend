@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -74,7 +75,7 @@ func SetupEnv() (cfg AppConfig, err error) {
 	}
 
 	return AppConfig{
-		ServerPort:            httpPort,
+		ServerPort:            fmt.Sprintf(":%s", httpPort),
 		DataSourceName:        DataSourceName,
 		AppSecret:             appSecret,
 		TwilioAccountSid:      twilioSid,
