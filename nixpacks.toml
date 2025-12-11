@@ -1,0 +1,14 @@
+[providers]
+  nix = "nixpkgs"
+
+[build]
+  builder = "nixpacks"
+  
+[phases.setup]
+  nixPkgs = ["go", "postgresql"]
+
+[phases.build]
+  cmds = ["go build -o bin/main cmd/main.go"]
+
+[start]
+  cmd = "./bin/main"
